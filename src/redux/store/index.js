@@ -4,6 +4,10 @@ import userReducer from '../reducers/user'
 
 import thunk from 'redux-thunk'
 import booksReducer from '../reducers/books'
+
+import { persistStore, persistReducer } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
+
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
 export const initialState = {
@@ -27,14 +31,20 @@ export const initialState = {
   },
 }
 
+const persistConfig = {
+  key: 'root',
+  storage,
+}
+
 const bigReducer = combineReducers({
   cart: cartReducer,
   user: userReducer,
   books: booksReducer,
 })
 
-export const configureStore = createStore(bigReducer, initialState, composeEnhancers(applyMiddleware(thunk)))
-// 3 arguments:
-// reducer
-// initialState
-// any enhancer
+const persistedReducer = persistReducer(persistConfig, bigReducer)
+
+const configureStore = createStore(persistedReducer, initialState, composeEnhancers(applyMiddleware(thunk)))
+const persistor = persistStore(configureStore)
+
+export { configureStore, persistor }
